@@ -1,0 +1,58 @@
+---
+- hosts: all
+  sudo: yes
+  tasks:
+    - name: libselinux-pythonをインストール
+      yum: name=libselinux-python state=installed
+    
+    - name: SELinuxを無効化
+      selinux: state=disabled
+    
+    - name: iusのリポジトリーを追加
+      yum: name=http://dl.iuscommunity.org/pub/ius/stable/CentOS/6/x86_64/ius-release-1.0-11.ius.centos6.noarch.rpm state=present
+      ignore_errors: yes
+
+    - name: Nginxのリポジトリーを追加
+      yum: name=http://nginx.org/packages/centos/6/noarch/RPMS/nginx-release-centos-6-0.el6.ngx.noarch.rpm state=present
+      ignore_errors: yes
+      
+    - name: Development toolsをインストール
+      yum: name="@Development tools" state=present
+
+    - name: nginx,python3.4をインストール
+      yum: name={{item}} state=present
+      with_items:
+        - nginx
+        - python34u
+        - python34u-devel
+
+    # - name: gunicornをインストール
+    #   pip: name=gunicorn version=19.1.1 executable=pip3
+      
+    # - name: Djangoをインストール
+    #   pip: name=django version=1.7.1 executable=pip3
+
+    - name: Djangoをインストール
+      pip: name={{ item.name }} version={{ item.version }} executable=pip3
+      with_items:
+        - {name: 'django', version: 1.7.1}
+        - {name: 'gunicorn', version: 19.1.1}
+        - {name: 'django-allauth', verion: 0.18.0}
+        - {name: 'django-debug-toolbar', version: 1.2.2}
+      
+    - name: Nginxの設定を変更
+      copy: src=files/nginx/default.conf dest=/etc/nginx/conf.d/default.conf
+      notify: restart_nginx
+
+    - name: Nginxのサービスを有効化
+      service: name=nginx state=running enabled=yes
+      
+    - name: Runitのrpmを転送
+      copy: src=files/runit-2.1.2-1.el6.x86_64.rpm dest=/root/runit-2.1.2-1.el6.x86_64.rpm
+
+    - name: Runitをインストール
+      yum: name=/root/runit-2.1.2-1.el6.x86_64.rpm state=installed
+    
+  handlers:
+    - name: restart_nginx
+      service: name=nginx state=restarted
