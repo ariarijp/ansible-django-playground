@@ -26,18 +26,12 @@
         - python34u
         - python34u-devel
 
-    # - name: gunicornをインストール
-    #   pip: name=gunicorn version=19.1.1 executable=pip3
-      
-    # - name: Djangoをインストール
-    #   pip: name=django version=1.7.1 executable=pip3
-
-    - name: Djangoをインストール
+    - name: Djangoの関連モジュールをインストール
       pip: name={{ item.name }} version={{ item.version }} executable=pip3
       with_items:
         - {name: 'django', version: 1.7.1}
         - {name: 'gunicorn', version: 19.1.1}
-        - {name: 'django-allauth', verion: 0.18.0}
+        - {name: 'django-allauth', version: 0.18.0}
         - {name: 'django-debug-toolbar', version: 1.2.2}
       
     - name: Nginxの設定を変更
@@ -52,6 +46,12 @@
 
     - name: Runitをインストール
       yum: name=/root/runit-2.1.2-1.el6.x86_64.rpm state=installed
+
+    - name: gunicornをRunitで動作させるためのディレクトリーを作成
+      file: path=/etc/sv/gunicorn state=directory
+
+    - name: gunicornの設定を転送
+      copy: src=files/gunicorn/gunicorn.conf.py dest=/etc/gunicorn.conf.py
     
   handlers:
     - name: restart_nginx

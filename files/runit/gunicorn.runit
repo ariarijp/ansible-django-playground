@@ -3,7 +3,6 @@
 GUNICORN=/usr/bin/gunicorn
 ROOT=/tmp
 PID=/var/run/gunicorn.pid
-
 APP=test:app
 
 if [ -f $PID ]; then rm $PID; fi
