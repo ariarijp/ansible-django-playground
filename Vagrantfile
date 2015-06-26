@@ -12,7 +12,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "shell", inline: <<-SHELL
     sed -i s/archive.ubuntu.com/ftp.jaist.ac.jp/ /etc/apt/sources.list
     apt-get update
-    apt-get install -y build-essential python-dev python-setuptools language-pack-ja
+    apt-get install -y build-essential python-dev python-setuptools language-pack-ja nginx
     easy_install pip
     pip install ansible
   SHELL
